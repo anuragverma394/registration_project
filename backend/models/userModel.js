@@ -7,15 +7,30 @@ exports.createUser = (
   phone,
   dob,
   gender,
-  userType,
-  course
+  address,
+  city,
+  state,
+  pincode,
+  qualifications
 ) => {
 
   return pool.query(
     `INSERT INTO "user".users
-     (name, email, password, phone, dob, gender, userType, course)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+     (name, email, password, phone, dob, gender, address, city, state, pincode, qualifications)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 
-    [name, email, password, phone, dob, gender, userType, course]
+    [
+      name,
+      email,
+      password,
+      phone,
+      dob,
+      gender,
+      address,
+      city,
+      state,
+      pincode,
+      JSON.stringify(qualifications)  // ✅ store array safely
+    ]
   );
 };
