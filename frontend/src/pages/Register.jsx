@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { validateRegister } from "../utils/validators";
+//import { validateRegister } from "../utils/validators";
 import { registerUser } from "../services/api";
 
 export default function Register() {
@@ -14,48 +15,73 @@ export default function Register() {
     course: "",
     password: "",
     confirmPassword: "",
+    qualifications: []
   });
 
-  const [errors, setErrors] = useState({});
+  const [qualificationInput, setQualificationInput] = useState({
+    qualification: "",
+    year: "",
+    percentage: ""
+  });
+
+  const [editIndex, setEditIndex] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field) => (e) =>
-    setForm({ ...form, [field]: e.target.value.trim() });
+    setForm({ ...form, [field]: e.target.value });
+
+  const handleQualificationInputChange = (field) => (e) =>
+    setQualificationInput({
+      ...qualificationInput,
+      [field]: e.target.value
+    });
+
+  const addQualification = () => {
+    const { qualification, year, percentage } = qualificationInput;
+
+    if (!qualification || !year || !percentage) {
+      alert("Fill qualification details");
+      return;
+    }
+
+    setForm({
+      ...form,
+      qualifications: [...form.qualifications, qualificationInput]
+    });
+
+    setQualificationInput({ qualification: "", year: "", percentage: "" });
+  };
+
+  const removeQualification = (index) => {
+    setForm({
+      ...form,
+      qualifications: form.qualifications.filter((_, i) => i !== index)
+    });
+  };
+
+  const editQualification = (index) => {
+    setQualificationInput(form.qualifications[index]);
+    setEditIndex(index);
+  };
+
+  const updateQualification = () => {
+    const updated = [...form.qualifications];
+    updated[editIndex] = qualificationInput;
+
+    setForm({ ...form, qualifications: updated });
+    setQualificationInput({ qualification: "", year: "", percentage: "" });
+    setEditIndex(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationErrors = validateRegister(form);
-
-    if (Object.keys(validationErrors).length) {
-      setErrors(validationErrors);
-      return;
-    }
-
     try {
       setLoading(true);
-
       const data = await registerUser(form);
-
       alert(data.message);
-
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        dob: "",
-        gender: "",
-        userType: "",
-        course: "",
-        password: "",
-        confirmPassword: "",
-      });
-
-      setErrors({});
-
     } catch (err) {
       alert(err.message);
-
     } finally {
       setLoading(false);
     }
@@ -64,216 +90,223 @@ export default function Register() {
   return (
     <>
       <style>{`
-        * {
-          box-sizing: border-box;
-          font-family: Arial, sans-serif;
-        }
-
         body {
           margin: 0;
-          background: #f2f4f8;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
+          background: #eef3f6;
+          font-family: Arial, sans-serif;
+          color: #2c3e50;
         }
 
         .page {
           width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          min-height: 100vh;
+          padding: 20px 40px;
         }
 
-        .card {
-          width: 380px;
+        .form-container {
           background: white;
-          border-radius: 12px;
-          padding: 25px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+          border: 1px solid #cfd8dc;
+          padding: 20px;
         }
 
-        h2 {
-          text-align: center;
-          color: #2d89ff;
-          margin-bottom: 20px;
+        .header {
+          font-size: 18px;
+          margin-bottom: 10px;
+          padding-bottom: 6px;
+          border-bottom: 1px solid #b0bec5;
+          color: #00695c;
+        }
+
+        .section-title {
+          font-size: 13px;
+          margin: 15px 0 8px;
+          padding-bottom: 4px;
+          border-bottom: 1px solid #d0d7dc;
+          color: #00695c;
+        }
+
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 8px 12px;
+        }
+
+        label {
+          font-size: 11px;
+          display: flex;
+          flex-direction: column;
         }
 
         input, select {
-          width: 100%;
-          border: none;
-          border-bottom: 2px solid #e0e0e0;
-          padding: 10px 5px;
-          margin-top: 14px;
-          font-size: 14px;
-          outline: none;
-          transition: 0.3s;
-          background: transparent;
+          margin-top: 3px;
+          padding: 5px;
+          font-size: 12px;
+          border: 1px solid #b0bec5;
+          background: #f9fbfc;
         }
 
         input:focus, select:focus {
-          border-bottom-color: #2d89ff;
+          outline: none;
+          border-color: #00695c;
+          background: white;
         }
 
-        .radio-group {
-          margin-top: 18px;
-          font-size: 14px;
-        }
-
-        .radio-group label {
-          margin-right: 15px;
-          cursor: pointer;
-        }
-
-        .error {
-          color: red;
-          font-size: 12px;
-          margin-top: 4px;
+        .button-row {
+          margin-top: 10px;
         }
 
         button {
-          width: 100%;
-          border: none;
-          padding: 12px;
-          border-radius: 25px;
-          background: linear-gradient(90deg, #2d89ff, #00c9a7);
-          color: white;
-          font-size: 15px;
+          font-size: 11px;
+          padding: 5px 10px;
+          border: 1px solid #90a4ae;
+          background: #eceff1;
           cursor: pointer;
-          transition: 0.3s;
-          margin-top: 22px;
+          margin-right: 6px;
         }
 
         button:hover {
-          opacity: 0.9;
+          background: #dfe6ea;
         }
 
-        button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
+        .submit-btn {
+          margin-top: 15px;
+          background: #00695c;
+          color: white;
+          border: none;
+          padding: 7px 16px;
+        }
+
+        .submit-btn:hover {
+          background: #004d40;
+        }
+
+        .qual-box {
+          border: 1px solid #cfd8dc;
+          background: #f9fbfc;
+          padding: 6px;
+          font-size: 11px;
+          margin-top: 6px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
       `}</style>
 
       <div className="page">
-        <div className="card">
-          <h2>Registration Form</h2>
+        <div className="form-container">
+          <div className="header">Application / Registration Form</div>
 
           <form onSubmit={handleSubmit}>
 
-            <input
-              placeholder="Name"
-              value={form.name}
-              onChange={handleChange("name")}
-            />
-            {errors.name && <div className="error">{errors.name}</div>}
-
-            <input
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange("email")}
-            />
-            {errors.email && <div className="error">{errors.email}</div>}
-
-            {/* ✅ FIXED PHONE INPUT */}
-            <input
-              placeholder="Phone"
-              value={form.phone}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  phone: e.target.value.replace(/\D/g, "").slice(0, 10)
-                })
-              }
-            />
-            {errors.phone && <div className="error">{errors.phone}</div>}
-
-            <input
-              type="date"
-              value={form.dob}
-              onChange={handleChange("dob")}
-            />
-            {errors.dob && <div className="error">{errors.dob}</div>}
-
-            <div className="radio-group">
-              <strong>Gender:</strong><br />
-
+            <div className="section-title">Personal Details</div>
+            <div className="grid">
               <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Male"
-                  checked={form.gender === "Male"}
-                  onChange={handleChange("gender")}
-                />
-                Male
+                Full Name
+                <input value={form.name} onChange={handleChange("name")} />
               </label>
 
               <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Female"
-                  checked={form.gender === "Female"}
-                  onChange={handleChange("gender")}
-                />
-                Female
+                Email Address
+                <input value={form.email} onChange={handleChange("email")} />
               </label>
 
               <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Other"
-                  checked={form.gender === "Other"}
-                  onChange={handleChange("gender")}
-                />
-                Other
+                Phone Number
+                <input value={form.phone} onChange={handleChange("phone")} />
+              </label>
+
+              <label>
+                Date of Birth
+                <input type="date" value={form.dob} onChange={handleChange("dob")} />
               </label>
             </div>
-            {errors.gender && <div className="error">{errors.gender}</div>}
 
-            <select
-              value={form.userType}
-              onChange={handleChange("userType")}
-            >
-              <option value="">Select User Type</option>
-              <option value="Admin">Admin</option>
-              <option value="Manager">Manager</option>
-              <option value="Customer">Customer</option>
-            </select>
-            {errors.userType && <div className="error">{errors.userType}</div>}
+            <div className="section-title">Academic Details</div>
+            <div className="grid">
+              <label>
+                User Type
+                <select value={form.userType} onChange={handleChange("userType")}>
+                  <option value="">Select</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Manager">Manager</option>
+                </select>
+              </label>
 
-            <select
-              value={form.course}
-              onChange={handleChange("course")}
-            >
-              <option value="">Select Course</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Physics">Physics</option>
-            </select>
-            {errors.course && <div className="error">{errors.course}</div>}
+              <label>
+                Course Applied
+                <select value={form.course} onChange={handleChange("course")}>
+                  <option value="">Select</option>
+                  <option value="CS">Computer Science</option>
+                </select>
+              </label>
+            </div>
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange("password")}
-            />
-            {errors.password && <div className="error">{errors.password}</div>}
+            <div className="section-title">Qualifications</div>
+            <div className="grid">
+              <label>
+                Qualification
+                <select
+                  value={qualificationInput.qualification}
+                  onChange={handleQualificationInputChange("qualification")}
+                >
+                  <option value="">Select</option>
+                  <option value="10th">10th</option>
+                  <option value="12th">12th</option>
+                  <option value="Graduation">Graduation</option>
+                </select>
+              </label>
 
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={form.confirmPassword}
-              onChange={handleChange("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <div className="error">{errors.confirmPassword}</div>
-            )}
+              <label>
+                Year
+                <input
+                  value={qualificationInput.year}
+                  onChange={handleQualificationInputChange("year")}
+                />
+              </label>
 
-            <button disabled={loading}>
-              {loading ? "Registering..." : "Create Account"}
+              <label>
+                Percentage
+                <input
+                  value={qualificationInput.percentage}
+                  onChange={handleQualificationInputChange("percentage")}
+                />
+              </label>
+            </div>
+
+            <div className="button-row">
+              <button
+                type="button"
+                onClick={editIndex !== null ? updateQualification : addQualification}
+              >
+                {editIndex !== null ? "Update" : "Add"}
+              </button>
+            </div>
+
+            {form.qualifications.map((q, i) => (
+              <div key={i} className="qual-box">
+                <span>[{i + 1}] {q.qualification} - {q.year} - {q.percentage}%</span>
+                <span>
+                  <button type="button" onClick={() => editQualification(i)}>Edit</button>
+                  <button type="button" onClick={() => removeQualification(i)}>Remove</button>
+                </span>
+              </div>
+            ))}
+
+            <div className="section-title">Security</div>
+            <div className="grid">
+              <label>
+                Password
+                <input type="password" value={form.password} onChange={handleChange("password")} />
+              </label>
+
+              <label>
+                Confirm Password
+                <input type="password" value={form.confirmPassword} onChange={handleChange("confirmPassword")} />
+              </label>
+            </div>
+
+            <button className="submit-btn" disabled={loading}>
+              {loading ? "Submitting..." : "Submit Application"}
             </button>
 
           </form>
