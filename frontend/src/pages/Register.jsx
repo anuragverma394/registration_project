@@ -3,6 +3,7 @@ import { validateRegister } from "../utils/validators";
 import { registerUser } from "../services/api";
 
 export default function Register() {
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -10,6 +11,7 @@ export default function Register() {
     dob: "",
     gender: "",
     userType: "",
+    course: "",
     password: "",
     confirmPassword: "",
   });
@@ -18,12 +20,13 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field) => (e) =>
-    setForm({ ...form, [field]: e.target.value });
+    setForm({ ...form, [field]: e.target.value.trim() });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = validateRegister(form);
+
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
       return;
@@ -31,6 +34,7 @@ export default function Register() {
 
     try {
       setLoading(true);
+
       const data = await registerUser(form);
 
       alert(data.message);
@@ -42,13 +46,16 @@ export default function Register() {
         dob: "",
         gender: "",
         userType: "",
+        course: "",
         password: "",
         confirmPassword: "",
       });
 
       setErrors({});
+
     } catch (err) {
       alert(err.message);
+
     } finally {
       setLoading(false);
     }
@@ -152,39 +159,83 @@ export default function Register() {
           <h2>Registration Form</h2>
 
           <form onSubmit={handleSubmit}>
-            <input placeholder="Name" value={form.name} onChange={handleChange("name")} />
+
+            <input
+              placeholder="Name"
+              value={form.name}
+              onChange={handleChange("name")}
+            />
             {errors.name && <div className="error">{errors.name}</div>}
 
-            <input placeholder="Email" value={form.email} onChange={handleChange("email")} />
+            <input
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange("email")}
+            />
             {errors.email && <div className="error">{errors.email}</div>}
 
-            <input placeholder="Phone" value={form.phone} onChange={handleChange("phone")} />
+            {/* ✅ FIXED PHONE INPUT */}
+            <input
+              placeholder="Phone"
+              value={form.phone}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  phone: e.target.value.replace(/\D/g, "").slice(0, 10)
+                })
+              }
+            />
             {errors.phone && <div className="error">{errors.phone}</div>}
 
-            {/* DOB */}
-            <input type="date" value={form.dob} onChange={handleChange("dob")} />
+            <input
+              type="date"
+              value={form.dob}
+              onChange={handleChange("dob")}
+            />
             {errors.dob && <div className="error">{errors.dob}</div>}
 
-            {/* Gender */}
             <div className="radio-group">
               <strong>Gender:</strong><br />
+
               <label>
-                <input type="radio" value="Male" checked={form.gender === "Male"} onChange={handleChange("gender")} />
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Male"
+                  checked={form.gender === "Male"}
+                  onChange={handleChange("gender")}
+                />
                 Male
               </label>
+
               <label>
-                <input type="radio" value="Female" checked={form.gender === "Female"} onChange={handleChange("gender")} />
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Female"
+                  checked={form.gender === "Female"}
+                  onChange={handleChange("gender")}
+                />
                 Female
               </label>
+
               <label>
-                <input type="radio" value="Other" checked={form.gender === "Other"} onChange={handleChange("gender")} />
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Other"
+                  checked={form.gender === "Other"}
+                  onChange={handleChange("gender")}
+                />
                 Other
               </label>
             </div>
             {errors.gender && <div className="error">{errors.gender}</div>}
 
-            {/* User Type */}
-            <select value={form.userType} onChange={handleChange("userType")}>
+            <select
+              value={form.userType}
+              onChange={handleChange("userType")}
+            >
               <option value="">Select User Type</option>
               <option value="Admin">Admin</option>
               <option value="Manager">Manager</option>
@@ -192,15 +243,39 @@ export default function Register() {
             </select>
             {errors.userType && <div className="error">{errors.userType}</div>}
 
-            <input type="password" placeholder="Password" value={form.password} onChange={handleChange("password")} />
+            <select
+              value={form.course}
+              onChange={handleChange("course")}
+            >
+              <option value="">Select Course</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Physics">Physics</option>
+            </select>
+            {errors.course && <div className="error">{errors.course}</div>}
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange("password")}
+            />
             {errors.password && <div className="error">{errors.password}</div>}
 
-            <input type="password" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange("confirmPassword")} />
-            {errors.confirmPassword && <div className="error">{errors.confirmPassword}</div>}
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={form.confirmPassword}
+              onChange={handleChange("confirmPassword")}
+            />
+            {errors.confirmPassword && (
+              <div className="error">{errors.confirmPassword}</div>
+            )}
 
             <button disabled={loading}>
               {loading ? "Registering..." : "Create Account"}
             </button>
+
           </form>
         </div>
       </div>

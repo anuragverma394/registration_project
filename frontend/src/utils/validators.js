@@ -4,10 +4,12 @@ export const validateRegister = ({
   phone,
   dob,
   gender,
-  userType,
+  userType,   // ✅ CORRECT
+  //course,
   password,
   confirmPassword,
 }) => {
+
   const errors = {};
 
   // Name
