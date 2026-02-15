@@ -8,7 +8,8 @@ const pool = new Pool({
   port: 5432,
 });
 
-pool.connect()
+/* ✅ SAFE CONNECTION TEST */
+pool.query("SELECT 1")
   .then(() => console.log("Database Connected ✅"))
   .catch((err) => console.error("DB Connection Error ❌", err));
 

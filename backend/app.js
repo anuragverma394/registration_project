@@ -1,13 +1,13 @@
-const express = require("express");
-const cors = require("cors");
+    const express = require("express");
+    const cors = require("cors");
 
-const userRoutes = require("./routes/userRoutes");
+    const userRoutes = require("./routes/userRoutes");
 
-const app = express();
+    const app = express();
 
-app.use(cors());
-app.use(express.json());
+    app.use(cors());
+    app.use(express.json());
 
-app.use(userRoutes);
+    app.use("/api", userRoutes); // ✅ BEST PRACTICE
 
-module.exports = app;
+    module.exports = app;
